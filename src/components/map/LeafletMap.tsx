@@ -4,20 +4,14 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix Leaflet default icon issues
-// This needs to be outside the component to only run once
-const DefaultIcon = L.icon({
+// Fix Leaflet default icon issues by directly setting icon paths
+// Must be defined outside component to run only once
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
 });
-
-// Apply the default icon to all markers
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapMarker {
   id: number;
@@ -27,7 +21,7 @@ interface MapMarker {
   description: string;
 }
 
-// Custom component to automatically set the map view
+// Custom component to set the map view
 const SetMapView: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
   const map = useMap();
   
@@ -45,8 +39,8 @@ interface LeafletMapProps {
 }
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) => {
-  // Define custom icons for different marker types
-  const friendIcon = L.icon({
+  // Create custom icons - doing this with simple objects rather than using the 'new' constructor
+  const friendIcon = {
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
     iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -55,9 +49,9 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) =
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
     className: 'friend-marker'
-  });
+  };
 
-  const famousIcon = L.icon({
+  const famousIcon = {
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
     iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -66,13 +60,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) =
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
     className: 'famous-marker'
-  });
+  };
 
   return (
     <MapContainer 
       center={center} 
       zoom={zoom} 
-      style={{ width: '100%', height: '100%' }}
+      style={{ height: '100%', width: '100%' }}
       className="rounded-lg"
       zoomControl={false}
     >
@@ -86,7 +80,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) =
         <Marker 
           key={marker.id} 
           position={marker.position} 
-          icon={marker.type === 'friend' ? friendIcon : famousIcon}
+          icon={L.icon(marker.type === 'friend' ? friendIcon : famousIcon)}
         >
           <Popup>
             <div>
