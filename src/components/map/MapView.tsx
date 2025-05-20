@@ -52,6 +52,14 @@ const MapView: React.FC = () => {
       title: 'Mountain Range',
       description: 'Challenging but rewarding summit',
       difficulty: 'Hard'
+    },
+    {
+      id: 8,
+      position: [46.3176, 2.4137] as [number, number],
+      type: 'viewpoint' as const,
+      title: 'Scenic Viewpoint',
+      description: 'Amazing panoramic views',
+      difficulty: 'Easy'
     }
   ];
 
