@@ -6,12 +6,13 @@ import LeafletMap from './LeafletMap';
 const MapView: React.FC = () => {
   const [activeView, setActiveView] = useState<'social' | 'personal'>('social');
   const [filters, setFilters] = useState({
-    forest: false,
-    mountain: true,
-    viewpoint: false,
+    common: true,
+    rare: false,
+    mythic: false,
+    legendary: false,
   });
   
-  // Enhanced sample data for map markers
+  // Enhanced sample data for social map markers
   const socialMapMarkers = [
     {
       id: 1,
@@ -19,6 +20,7 @@ const MapView: React.FC = () => {
       type: 'friend' as const,
       title: 'Sarah\'s Hike',
       description: 'Beautiful trail with amazing views!',
+      difficulty: 'common'
     },
     {
       id: 2,
@@ -26,6 +28,7 @@ const MapView: React.FC = () => {
       type: 'famous' as const,
       title: 'Famous Peak',
       description: 'A popular destination among expert hikers',
+      difficulty: 'legendary'
     },
     {
       id: 3,
@@ -33,30 +36,31 @@ const MapView: React.FC = () => {
       type: 'friend' as const,
       title: 'John\'s Adventure',
       description: 'Weekend camping trip',
+      difficulty: 'rare'
     },
     {
       id: 6,
       position: [46.2976, 2.3937] as [number, number],
-      type: 'forest' as const,
-      title: 'National Forest',
+      type: 'friend' as const,
+      title: 'Forest Trail',
       description: 'Beautiful forest with many trails',
-      difficulty: 'Easy'
+      difficulty: 'common'
     },
     {
       id: 7,
       position: [46.1576, 2.1337] as [number, number],
-      type: 'mountain' as const,
+      type: 'famous' as const,
       title: 'Mountain Range',
       description: 'Challenging but rewarding summit',
-      difficulty: 'Hard'
+      difficulty: 'mythic'
     },
     {
       id: 8,
       position: [46.3176, 2.4137] as [number, number],
-      type: 'viewpoint' as const,
+      type: 'friend' as const,
       title: 'Scenic Viewpoint',
       description: 'Amazing panoramic views',
-      difficulty: 'Easy'
+      difficulty: 'legendary'
     }
   ];
 
@@ -65,35 +69,55 @@ const MapView: React.FC = () => {
     {
       id: 4,
       position: [46.2876, 2.1137] as [number, number],
-      type: 'friend' as const,
+      type: 'completed' as const,
       title: 'My Favorite Trail',
       description: 'Completed on April 15, 2025',
-      difficulty: 'Moderate'
+      difficulty: 'common'
     },
     {
       id: 5,
       position: [46.3276, 2.3137] as [number, number],
-      type: 'famous' as const,
+      type: 'planned' as const,
       title: 'Planned Trip',
       description: 'Scheduled for June 10, 2025',
-      difficulty: 'Easy'
+      difficulty: 'rare'
+    },
+    {
+      id: 9,
+      position: [46.2376, 2.0137] as [number, number],
+      type: 'saved' as const,
+      title: 'Dream Summit',
+      description: 'To do someday',
+      difficulty: 'mythic'
+    },
+    {
+      id: 10,
+      position: [46.1876, 1.7137] as [number, number],
+      type: 'completed' as const,
+      title: 'Epic Challenge',
+      description: 'Conquered last summer',
+      difficulty: 'legendary'
     }
   ];
 
-  // Filter markers based on selected filters
+  // Filter markers based on selected filters and active view
   const getFilteredMarkers = () => {
     const allMarkers = activeView === 'social' ? socialMapMarkers : personalMapMarkers;
     
-    if (!filters.forest && !filters.mountain && !filters.viewpoint) {
+    if (!filters.common && !filters.rare && !filters.mythic && !filters.legendary) {
       return allMarkers;
     }
     
     return allMarkers.filter(marker => 
-      (filters.forest && marker.type === 'forest') ||
-      (filters.mountain && marker.type === 'mountain') ||
-      (filters.viewpoint && marker.type === 'viewpoint') ||
-      marker.type === 'friend' || marker.type === 'famous'
+      (filters.common && marker.difficulty === 'common') ||
+      (filters.rare && marker.difficulty === 'rare') ||
+      (filters.mythic && marker.difficulty === 'mythic') ||
+      (filters.legendary && marker.difficulty === 'legendary')
     );
+  };
+
+  const handleToggleView = (view: 'social' | 'personal') => {
+    setActiveView(view);
   };
 
   return (
@@ -104,13 +128,14 @@ const MapView: React.FC = () => {
           center={activeView === 'social' ? [46.2276, 2.2137] : [46.2876, 2.1137]} 
           zoom={7}
           markers={getFilteredMarkers()}
+          mapMode={activeView}
         />
         
         {/* Overlay elements positioned absolutely over the map */}
         <div className="absolute top-0 left-0 right-0 p-4 z-10">
           <FilterBar 
             onFilterChange={setFilters} 
-            onToggleView={setActiveView}
+            onToggleView={handleToggleView}
             activeView={activeView}
           />
         </div>

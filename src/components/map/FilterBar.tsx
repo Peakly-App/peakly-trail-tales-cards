@@ -1,24 +1,25 @@
 
 import React, { useState } from 'react';
-import { Search, Navigation, MapPin } from 'lucide-react';
+import { Search, MapPin, Star } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface FilterBarProps {
-  onFilterChange: (filters: { forest: boolean; mountain: boolean; viewpoint: boolean }) => void;
+  onFilterChange: (filters: { common: boolean; rare: boolean; mythic: boolean; legendary: boolean }) => void;
   onToggleView: (view: 'social' | 'personal') => void;
   activeView: 'social' | 'personal';
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange, onToggleView, activeView }) => {
   const [filters, setFilters] = useState({
-    forest: false,
-    mountain: true,
-    viewpoint: false,
+    common: true,
+    rare: false,
+    mythic: false,
+    legendary: false,
   });
   
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleFilterClick = (filter: 'forest' | 'mountain' | 'viewpoint') => {
+  const handleFilterClick = (filter: 'common' | 'rare' | 'mythic' | 'legendary') => {
     const newFilters = { ...filters, [filter]: !filters[filter] };
     setFilters(newFilters);
     onFilterChange(newFilters);
@@ -43,28 +44,46 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange, onToggleView, act
         </button>
       </div>
       
-      {/* One-click filter options - match the uploaded image style */}
+      {/* Map Toggle - Social / My Map */}
+      <div className="flex justify-center mb-2">
+        <ToggleGroup type="single" value={activeView} onValueChange={(value) => value && onToggleView(value as 'social' | 'personal')} className="bg-white/80 backdrop-blur-sm rounded-full p-1 shadow-sm">
+          <ToggleGroupItem value="social" className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-white">
+            Social Map
+          </ToggleGroupItem>
+          <ToggleGroupItem value="personal" className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-white">
+            My Map
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+      
+      {/* One-click filter options - difficulty ratings */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         <button
-          className="filter-option bg-white/80 backdrop-blur-sm flex items-center gap-2 px-6 py-2.5 rounded-full border border-gray-300 shadow-sm"
+          onClick={() => handleFilterClick('common')}
+          className={`filter-option ${filters.common ? 'bg-rarity-common text-gray-800' : 'bg-white/80 text-gray-800'} backdrop-blur-sm flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 shadow-sm`}
         >
-          <span className="w-7 h-7 bg-green-600 rounded-full flex items-center justify-center">
-            <MapPin size={16} className="text-white" />
-          </span>
-          <span className="font-medium">À proximité</span>
+          <span className="font-medium">Common</span>
         </button>
         
         <button
-          onClick={() => handleFilterClick('forest')}
-          className={`filter-option ${filters.forest ? 'bg-green-700/90 text-white' : 'bg-white/80 text-gray-800'} backdrop-blur-sm flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 shadow-sm`}
+          onClick={() => handleFilterClick('rare')}
+          className={`filter-option ${filters.rare ? 'bg-rarity-rare text-white' : 'bg-white/80 text-gray-800'} backdrop-blur-sm flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 shadow-sm`}
         >
-          <span className="font-medium">En forêt</span>
+          <span className="font-medium">Rare</span>
         </button>
         
         <button
-          className="filter-option bg-white/80 backdrop-blur-sm flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 shadow-sm"
+          onClick={() => handleFilterClick('mythic')}
+          className={`filter-option ${filters.mythic ? 'bg-rarity-epic text-white' : 'bg-white/80 text-gray-800'} backdrop-blur-sm flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 shadow-sm`}
         >
-          <span className="font-medium">Chiens bienvenus</span>
+          <span className="font-medium">Mythic</span>
+        </button>
+        
+        <button
+          onClick={() => handleFilterClick('legendary')}
+          className={`filter-option ${filters.legendary ? 'bg-rarity-legendary text-white' : 'bg-white/80 text-gray-800'} backdrop-blur-sm flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-300 shadow-sm`}
+        >
+          <span className="font-medium">Legendary</span>
         </button>
       </div>
     </div>
