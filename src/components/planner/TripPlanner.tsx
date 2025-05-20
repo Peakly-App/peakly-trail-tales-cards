@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AccordionStep from './AccordionStep';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Calendar, Clock, Navigation, Users, X, ArrowLeft } from 'lucide-react';
 import useTripPlanner from '@/hooks/useTripPlanner';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const TrailCard = ({ 
   name, 
