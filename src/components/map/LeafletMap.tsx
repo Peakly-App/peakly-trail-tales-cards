@@ -1,40 +1,5 @@
 
-import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-// Correctly fix the icon path issue - this is a common Leaflet problem in React
-// Do this outside the component to ensure it runs only once
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
-
-// Pre-create the icon instances outside of the component
-const friendIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-  className: 'friend-marker'
-});
-
-const famousIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-  className: 'famous-marker'
-});
+import React from 'react';
 
 interface MapMarker {
   id: number;
@@ -44,17 +9,6 @@ interface MapMarker {
   description: string;
 }
 
-// Custom component to set the map view
-const SetMapView: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
-  
-  return null;
-};
-
 interface LeafletMapProps {
   center: [number, number];
   zoom: number;
@@ -62,35 +16,53 @@ interface LeafletMapProps {
 }
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) => {
+  // Generate static map URL with markers
+  const generateMapUrl = () => {
+    // Base URL for OpenStreetMap static map (via staticmap.org - a free service)
+    let baseUrl = `https://staticmap.org/static?center=${center[0]},${center[1]}&zoom=${zoom}&size=600x400&type=osm`;
+    
+    // Add markers
+    markers.forEach((marker, index) => {
+      const markerType = marker.type === 'friend' ? 'blue' : 'orange';
+      baseUrl += `&markers=${marker.position[0]},${marker.position[1]},${markerType},${index + 1}`;
+    });
+    
+    return baseUrl;
+  };
+
   return (
-    <MapContainer 
-      center={center} 
-      zoom={zoom} 
-      style={{ height: '100%', width: '100%' }}
-      className="rounded-lg"
-      zoomControl={false}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <SetMapView center={center} zoom={zoom} />
-      
-      {markers.map(marker => (
-        <Marker 
-          key={marker.id} 
-          position={marker.position} 
-          icon={marker.type === 'friend' ? friendIcon : famousIcon}
-        >
-          <Popup>
-            <div>
-              <h3 className="text-base font-medium">{marker.title}</h3>
-              <p className="text-sm text-gray-600">{marker.description}</p>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <div className="relative h-full w-full flex flex-col">
+      <div className="relative flex-grow overflow-hidden rounded-lg">
+        <img 
+          src={generateMapUrl()} 
+          alt="Map" 
+          className="w-full h-full object-cover rounded-lg"
+        />
+        
+        {/* Overlay with marker information */}
+        <div className="absolute bottom-4 left-4 right-4 max-h-48 overflow-y-auto bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-md">
+          <h3 className="text-sm font-medium mb-2">Map Locations</h3>
+          <div className="space-y-2">
+            {markers.map(marker => (
+              <div key={marker.id} className="bg-white rounded p-2 shadow-sm">
+                <h4 className="text-sm font-medium">{marker.title}</h4>
+                <p className="text-xs text-gray-600">{marker.description}</p>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-gray-500">
+                    {marker.position[0].toFixed(2)}, {marker.position[1].toFixed(2)}
+                  </span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    marker.type === 'friend' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'
+                  }`}>
+                    {marker.type === 'friend' ? 'Friend' : 'Famous'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
