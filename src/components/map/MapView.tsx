@@ -36,76 +36,32 @@ const MapView: React.FC = () => {
     }
   ];
 
+  // Personal map markers
+  const personalMapMarkers = [
+    {
+      id: 4,
+      position: [46.2876, 2.1137] as [number, number],
+      type: 'friend' as const,
+      title: 'My Favorite Trail',
+      description: 'Completed on April 15, 2025'
+    },
+    {
+      id: 5,
+      position: [46.3276, 2.3137] as [number, number],
+      type: 'famous' as const,
+      title: 'Planned Trip',
+      description: 'Scheduled for June 10, 2025'
+    }
+  ];
+
   // Filter markers based on selected filters
-  const filteredMarkers = socialMapMarkers.filter(marker => {
-    // This is just a placeholder. In a real app, markers would have properties
-    // matching the filter criteria (forest, mountain, viewpoint)
-    return true;
-  });
-
-  console.log('Map view active:', activeView);
-  console.log('Filters:', filters);
-
-  const renderPersonalDashboard = () => {
-    return (
-      <div className="space-y-4 mt-4">
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Upcoming Trips</h2>
-          <div className="trip-card p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium">Mount Rainier</h3>
-                <p className="text-xs text-gray-500">May 28 - May 30, 2025</p>
-              </div>
-              <div className="terrain-badge terrain-t3">T3</div>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Saved Routes</h2>
-          <div className="trip-card p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium">Cascade Pass</h3>
-                <p className="text-xs text-gray-500">7.4 miles • 1,800 ft elevation</p>
-              </div>
-              <div className="terrain-badge terrain-t2">T2</div>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Summit Cards Progress</h2>
-          <div className="bg-white rounded-lg p-4 shadow-md">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-medium">Common</span>
-              <span className="text-sm">12/20</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-rarity-common h-2 rounded-full" style={{ width: '60%' }}></div>
-            </div>
-            
-            <div className="flex justify-between items-center mb-2 mt-4">
-              <span className="font-medium">Rare</span>
-              <span className="text-sm">3/15</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-rarity-rare h-2 rounded-full" style={{ width: '20%' }}></div>
-            </div>
-            
-            <div className="flex justify-between items-center mb-2 mt-4">
-              <span className="font-medium">Epic</span>
-              <span className="text-sm">1/10</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-rarity-epic h-2 rounded-full" style={{ width: '10%' }}></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const filteredMarkers = activeView === 'social' 
+    ? socialMapMarkers.filter(marker => {
+        // This is just a placeholder. In a real app, markers would have properties
+        // matching the filter criteria (forest, mountain, viewpoint)
+        return true;
+      })
+    : personalMapMarkers;
 
   return (
     <div className="space-y-4">
@@ -117,17 +73,60 @@ const MapView: React.FC = () => {
         activeView={activeView}
       />
       
-      {activeView === 'social' ? (
-        <div className="relative rounded-xl overflow-hidden bg-gray-100 map-container">
-          <LeafletMap 
-            center={[46.2276, 2.2137]} // Default center (France)
-            zoom={6}
-            markers={filteredMarkers}
-          />
-        </div>
-      ) : (
-        renderPersonalDashboard()
-      )}
+      <div className="relative rounded-xl overflow-hidden bg-gray-100 map-container">
+        <LeafletMap 
+          center={activeView === 'social' ? [46.2276, 2.2137] : [46.2876, 2.1137]} 
+          zoom={6}
+          markers={filteredMarkers}
+        />
+        
+        {activeView === 'personal' && (
+          <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg max-h-60 overflow-y-auto">
+            <h2 className="text-lg font-semibold mb-2">My Adventures</h2>
+            
+            <div className="space-y-2">
+              <div className="bg-white rounded p-2 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">Mount Rainier</h3>
+                    <p className="text-xs text-gray-500">May 28 - May 30, 2025</p>
+                  </div>
+                  <div className="terrain-badge terrain-t3">T3</div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded p-2 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">Cascade Pass</h3>
+                    <p className="text-xs text-gray-500">7.4 miles • 1,800 ft elevation</p>
+                  </div>
+                  <div className="terrain-badge terrain-t2">T2</div>
+                </div>
+              </div>
+            </div>
+            
+            <h2 className="text-lg font-semibold mt-4 mb-2">Summit Cards Progress</h2>
+            <div className="bg-white rounded p-2 shadow-sm">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium">Common</span>
+                <span className="text-xs">12/20</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
+              </div>
+              
+              <div className="flex justify-between items-center mb-1 mt-2">
+                <span className="text-sm font-medium">Rare</span>
+                <span className="text-xs">3/15</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '20%' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
