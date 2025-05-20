@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import AccordionStep from './AccordionStep';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Navigation, Users, X } from 'lucide-react';
+import { Calendar, Clock, Navigation, Users, X, ArrowLeft } from 'lucide-react';
 import useTripPlanner from '@/hooks/useTripPlanner';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
@@ -80,6 +80,22 @@ const FutureTrip = ({ name, date, terrain }: { name: string; date: string; terra
     </CardContent>
   </Card>
 );
+
+// Progress indicator component for the trail results page
+const ProgressSteps = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => {
+  return (
+    <div className="flex items-center justify-center gap-2 mb-4">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <div
+          key={index}
+          className={`w-3 h-3 rounded-full ${
+            index < currentStep ? 'bg-primary' : index === currentStep ? 'bg-primary ring-2 ring-primary/30' : 'bg-gray-200'
+          }`}
+        />
+      ))}
+    </div>
+  );
+};
 
 const TripPlanner: React.FC = () => {
   const {
@@ -186,17 +202,18 @@ const TripPlanner: React.FC = () => {
 
   if (showSearchResults) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4 overflow-y-auto h-[calc(100vh-4rem)]">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Trail Results</h1>
-          <Button variant="outline" size="sm" onClick={() => setShowSearchResults(false)}>
-            Back to Planner
+          <Button variant="ghost" size="sm" onClick={() => setShowSearchResults(false)} className="flex items-center gap-1">
+            <ArrowLeft size={16} />
+            Back
           </Button>
+          <h1 className="text-lg font-bold">Trail Results</h1>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold">Step 2/5 – Choose your trail</h2>
-          <p className="text-sm text-muted-foreground">Select a trail that matches your gear and skill level</p>
+        <div className="text-center mb-6">
+          <ProgressSteps currentStep={1} totalSteps={5} />
+          <p className="text-sm text-muted-foreground">Choose your trail</p>
         </div>
           
         <div className="space-y-4">
@@ -255,243 +272,245 @@ const TripPlanner: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Plan Your Adventure</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left column: Trip planning steps */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Plan A Trip</h2>
-          <div className="space-y-4">
-            <AccordionStep
-              title="Dates & Difficulty"
-              stepNumber={1}
-              isOpen={openStep === 'basics'}
-              isCompleted={isStepCompleted('basics')}
-              isEnabled={isStepEnabled('basics')}
-              onToggle={() => handleStepToggle('basics')}
-            >
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Start Date</label>
-                    <div className="flex w-full border rounded-md overflow-hidden">
-                      <div className="flex items-center justify-center bg-muted px-2">
-                        <Calendar size={16} />
+    <ScrollArea className="h-[calc(100vh-4rem)]">
+      <div className="space-y-6 p-4">
+        <h1 className="text-2xl font-bold">Plan Your Adventure</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left column: Trip planning steps */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Plan A Trip</h2>
+            <div className="space-y-4">
+              <AccordionStep
+                title="Dates & Difficulty"
+                stepNumber={1}
+                isOpen={openStep === 'basics'}
+                isCompleted={isStepCompleted('basics')}
+                isEnabled={isStepEnabled('basics')}
+                onToggle={() => handleStepToggle('basics')}
+              >
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Start Date</label>
+                      <div className="flex w-full border rounded-md overflow-hidden">
+                        <div className="flex items-center justify-center bg-muted px-2">
+                          <Calendar size={16} />
+                        </div>
+                        <input 
+                          type="date" 
+                          className="w-full p-2 focus:outline-none" 
+                        />
                       </div>
-                      <input 
-                        type="date" 
-                        className="w-full p-2 focus:outline-none" 
-                      />
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">End Date</label>
-                    <div className="flex w-full border rounded-md overflow-hidden">
-                      <div className="flex items-center justify-center bg-muted px-2">
-                        <Calendar size={16} />
+                    <div>
+                      <label className="block text-sm font-medium mb-1">End Date</label>
+                      <div className="flex w-full border rounded-md overflow-hidden">
+                        <div className="flex items-center justify-center bg-muted px-2">
+                          <Calendar size={16} />
+                        </div>
+                        <input 
+                          type="date" 
+                          className="w-full p-2 focus:outline-none" 
+                        />
                       </div>
-                      <input 
-                        type="date" 
-                        className="w-full p-2 focus:outline-none" 
-                      />
                     </div>
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Difficulty Level</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="easy">Easy (T1-T2)</option>
-                    <option value="moderate">Moderate (T3)</option>
-                    <option value="hard">Hard (T4)</option>
-                    <option value="expert">Expert (T5+)</option>
-                  </select>
-                </div>
-                
-                <Button 
-                  onClick={() => completeStep('basics')}
-                  className="w-full"
-                >
-                  Next Step
-                </Button>
-              </div>
-            </AccordionStep>
-            
-            <AccordionStep
-              title="Starting Point"
-              stepNumber={2}
-              isOpen={openStep === 'startPoint'}
-              isCompleted={isStepCompleted('startPoint')}
-              isEnabled={isStepEnabled('startPoint')}
-              onToggle={() => handleStepToggle('startPoint')}
-            >
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Location</label>
-                  <div className="flex w-full border rounded-md overflow-hidden">
-                    <div className="flex items-center justify-center bg-muted px-2">
-                      <Navigation size={16} />
-                    </div>
-                    <input 
-                      type="text" 
-                      placeholder="Enter city, park, or coordinates" 
-                      className="w-full p-2 focus:outline-none" 
-                    />
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Difficulty Level</label>
+                    <select className="w-full p-2 border rounded-md">
+                      <option value="easy">Easy (T1-T2)</option>
+                      <option value="moderate">Moderate (T3)</option>
+                      <option value="hard">Hard (T4)</option>
+                      <option value="expert">Expert (T5+)</option>
+                    </select>
                   </div>
-                </div>
-                
-                <div className="bg-muted/30 p-3 rounded-md">
-                  <p className="text-sm">
-                    <strong>Tip:</strong> Choose a starting point within 150 miles for a weekend trip
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
+                  
                   <Button 
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setOpenStep('basics')}
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    onClick={() => completeStep('startPoint')}
+                    onClick={() => completeStep('basics')}
                     className="w-full"
                   >
                     Next Step
                   </Button>
                 </div>
-              </div>
-            </AccordionStep>
-            
-            <AccordionStep
-              title="Team Members"
-              stepNumber={3}
-              isOpen={openStep === 'team'}
-              isCompleted={isStepCompleted('team')}
-              isEnabled={isStepEnabled('team')}
-              onToggle={() => handleStepToggle('team')}
-            >
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Add Hikers</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text"
-                      value={teamMemberName}
-                      onChange={(e) => setTeamMemberName(e.target.value)}
-                      placeholder="Enter name or email" 
-                      className="flex-1 p-2 border rounded-md" 
-                    />
-                    <Button variant="outline" size="sm" onClick={handleAddTeamMember}>
-                      <Users size={16} className="mr-1" />
-                      Add
+              </AccordionStep>
+              
+              <AccordionStep
+                title="Starting Point"
+                stepNumber={2}
+                isOpen={openStep === 'startPoint'}
+                isCompleted={isStepCompleted('startPoint')}
+                isEnabled={isStepEnabled('startPoint')}
+                onToggle={() => handleStepToggle('startPoint')}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Location</label>
+                    <div className="flex w-full border rounded-md overflow-hidden">
+                      <div className="flex items-center justify-center bg-muted px-2">
+                        <Navigation size={16} />
+                      </div>
+                      <input 
+                        type="text" 
+                        placeholder="Enter city, park, or coordinates" 
+                        className="w-full p-2 focus:outline-none" 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-3 rounded-md">
+                    <p className="text-sm">
+                      <strong>Tip:</strong> Choose a starting point within 150 miles for a weekend trip
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setOpenStep('basics')}
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      onClick={() => completeStep('startPoint')}
+                      className="w-full"
+                    >
+                      Next Step
                     </Button>
                   </div>
                 </div>
-                
-                <div className="bg-white border rounded-md p-3">
-                  <p className="text-sm font-medium mb-2">Current Team ({plannerState.team.length})</p>
-                  <div className="space-y-2">
-                    {plannerState.team.map((member) => (
-                      <div key={member.id} className="flex justify-between items-center text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-6 h-6 ${member.isOwner ? 'bg-primary' : 'bg-gray-500'} text-white rounded-full flex items-center justify-center text-xs`}>
-                            {member.avatarInitials}
-                          </div>
-                          <span>{member.name}</span>
-                        </div>
-                        <div className="flex items-center">
-                          {member.isOwner ? (
-                            <div className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-800 rounded">
-                              Owner
+              </AccordionStep>
+              
+              <AccordionStep
+                title="Team Members"
+                stepNumber={3}
+                isOpen={openStep === 'team'}
+                isCompleted={isStepCompleted('team')}
+                isEnabled={isStepEnabled('team')}
+                onToggle={() => handleStepToggle('team')}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Add Hikers</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        value={teamMemberName}
+                        onChange={(e) => setTeamMemberName(e.target.value)}
+                        placeholder="Enter name or email" 
+                        className="flex-1 p-2 border rounded-md" 
+                      />
+                      <Button variant="outline" size="sm" onClick={handleAddTeamMember}>
+                        <Users size={16} className="mr-1" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white border rounded-md p-3">
+                    <p className="text-sm font-medium mb-2">Current Team ({plannerState.team.length})</p>
+                    <div className="space-y-2">
+                      {plannerState.team.map((member) => (
+                        <div key={member.id} className="flex justify-between items-center text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 ${member.isOwner ? 'bg-primary' : 'bg-gray-500'} text-white rounded-full flex items-center justify-center text-xs`}>
+                              {member.avatarInitials}
                             </div>
-                          ) : (
-                            <button 
-                              onClick={() => removeTeamMember(member.id)}
-                              className="text-gray-500 hover:text-red-500"
-                            >
-                              <X size={16} />
-                            </button>
-                          )}
+                            <span>{member.name}</span>
+                          </div>
+                          <div className="flex items-center">
+                            {member.isOwner ? (
+                              <div className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-800 rounded">
+                                Owner
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => removeTeamMember(member.id)}
+                                className="text-gray-500 hover:text-red-500"
+                              >
+                                <X size={16} />
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
 
-                    {plannerState.team.length === 0 && (
-                      <div className="text-sm text-gray-500 text-center py-2">
-                        No team members yet. Add someone to join your adventure!
-                      </div>
-                    )}
+                      {plannerState.team.length === 0 && (
+                        <div className="text-sm text-gray-500 text-center py-2">
+                          No team members yet. Add someone to join your adventure!
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setOpenStep('startPoint')}
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      onClick={() => completeStep('team')}
+                      className="w-full"
+                    >
+                      Next Step
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-2">
+              </AccordionStep>
+              
+              <AccordionStep
+                title="Find Trails"
+                stepNumber={4}
+                isOpen={openStep === 'search'}
+                isCompleted={isStepCompleted('search')}
+                isEnabled={isStepEnabled('search')}
+                onToggle={() => handleStepToggle('search')}
+              >
+                <div className="space-y-4">
                   <Button 
-                    variant="outline"
                     className="w-full"
-                    onClick={() => setOpenStep('startPoint')}
+                    onClick={handleFindTrails}
                   >
-                    Back
+                    Find Perfect Trails
                   </Button>
-                  <Button 
-                    onClick={() => completeStep('team')}
-                    className="w-full"
-                  >
-                    Next Step
-                  </Button>
+                  
+                  <p className="text-center text-sm text-muted-foreground">
+                    AI will recommend trails based on your preferences
+                  </p>
                 </div>
+              </AccordionStep>
+            </div>
+          </div>
+          
+          {/* Right column: Future trips */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4">My Future Trips</h2>
+            {futureTrips.length > 0 ? (
+              <div className="space-y-2">
+                {futureTrips.map(trip => (
+                  <FutureTrip 
+                    key={trip.id} 
+                    name={trip.name} 
+                    date={trip.date} 
+                    terrain={trip.terrain} 
+                  />
+                ))}
               </div>
-            </AccordionStep>
-            
-            <AccordionStep
-              title="Find Trails"
-              stepNumber={4}
-              isOpen={openStep === 'search'}
-              isCompleted={isStepCompleted('search')}
-              isEnabled={isStepEnabled('search')}
-              onToggle={() => handleStepToggle('search')}
-            >
-              <div className="space-y-4">
-                <Button 
-                  className="w-full"
-                  onClick={handleFindTrails}
-                >
-                  Find Perfect Trails
-                </Button>
-                
-                <p className="text-center text-sm text-muted-foreground">
-                  AI will recommend trails based on your preferences
-                </p>
+            ) : (
+              <div className="text-center p-6 bg-gray-50 rounded-lg border border-dashed">
+                <p className="text-gray-500">No upcoming trips yet</p>
+                <p className="text-sm text-gray-400 mt-1">Plan your first adventure!</p>
               </div>
-            </AccordionStep>
+            )}
           </div>
         </div>
-        
-        {/* Right column: Future trips */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4">My Future Trips</h2>
-          {futureTrips.length > 0 ? (
-            <div className="space-y-2">
-              {futureTrips.map(trip => (
-                <FutureTrip 
-                  key={trip.id} 
-                  name={trip.name} 
-                  date={trip.date} 
-                  terrain={trip.terrain} 
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center p-6 bg-gray-50 rounded-lg border border-dashed">
-              <p className="text-gray-500">No upcoming trips yet</p>
-              <p className="text-sm text-gray-400 mt-1">Plan your first adventure!</p>
-            </div>
-          )}
-        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 

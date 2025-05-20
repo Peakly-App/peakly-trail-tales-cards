@@ -25,8 +25,8 @@ const AppLayout: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen pb-16">
-      <div className="container mx-auto p-4">
+    <div className="relative h-screen w-screen overflow-hidden">
+      <div className="h-[calc(100vh-4rem)]">
         {renderContent()}
       </div>
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
