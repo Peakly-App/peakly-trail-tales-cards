@@ -11,28 +11,47 @@ const MapView: React.FC = () => {
     viewpoint: false,
   });
   
-  // Sample data for map markers
+  // Enhanced sample data for map markers
   const socialMapMarkers = [
     {
       id: 1,
       position: [46.2276, 2.2137] as [number, number], // Sample position in France
       type: 'friend' as const,
       title: 'Sarah\'s Hike',
-      description: 'Beautiful trail with amazing views!'
+      description: 'Beautiful trail with amazing views!',
+      price: 71
     },
     {
       id: 2,
       position: [46.4276, 2.5137] as [number, number],
       type: 'famous' as const,
       title: 'Famous Peak',
-      description: 'A popular destination among expert hikers'
+      description: 'A popular destination among expert hikers',
+      price: 100
     },
     {
       id: 3,
       position: [46.1276, 1.9137] as [number, number],
       type: 'friend' as const,
       title: 'John\'s Adventure',
-      description: 'Weekend camping trip'
+      description: 'Weekend camping trip',
+      price: 59
+    },
+    {
+      id: 6,
+      position: [46.2976, 2.3937] as [number, number],
+      type: 'forest' as const,
+      title: 'National Forest',
+      description: 'Beautiful forest with many trails',
+      difficulty: 'Easy'
+    },
+    {
+      id: 7,
+      position: [46.1576, 2.1337] as [number, number],
+      type: 'mountain' as const,
+      title: 'Mountain Range',
+      description: 'Challenging but rewarding summit',
+      difficulty: 'Hard'
     }
   ];
 
@@ -43,21 +62,34 @@ const MapView: React.FC = () => {
       position: [46.2876, 2.1137] as [number, number],
       type: 'friend' as const,
       title: 'My Favorite Trail',
-      description: 'Completed on April 15, 2025'
+      description: 'Completed on April 15, 2025',
+      difficulty: 'Moderate'
     },
     {
       id: 5,
       position: [46.3276, 2.3137] as [number, number],
       type: 'famous' as const,
       title: 'Planned Trip',
-      description: 'Scheduled for June 10, 2025'
+      description: 'Scheduled for June 10, 2025',
+      difficulty: 'Easy'
     }
   ];
 
   // Filter markers based on selected filters
-  const filteredMarkers = activeView === 'social' 
-    ? socialMapMarkers
-    : personalMapMarkers;
+  const getFilteredMarkers = () => {
+    const allMarkers = activeView === 'social' ? socialMapMarkers : personalMapMarkers;
+    
+    if (!filters.forest && !filters.mountain && !filters.viewpoint) {
+      return allMarkers;
+    }
+    
+    return allMarkers.filter(marker => 
+      (filters.forest && marker.type === 'forest') ||
+      (filters.mountain && marker.type === 'mountain') ||
+      (filters.viewpoint && marker.type === 'viewpoint') ||
+      marker.type === 'friend' || marker.type === 'famous'
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -72,56 +104,14 @@ const MapView: React.FC = () => {
       <div className="relative rounded-xl overflow-hidden bg-gray-100" style={{ height: '500px' }}>
         <LeafletMap 
           center={activeView === 'social' ? [46.2276, 2.2137] : [46.2876, 2.1137]} 
-          zoom={6}
-          markers={filteredMarkers}
+          zoom={7}
+          markers={getFilteredMarkers()}
         />
         
-        {activeView === 'personal' && (
-          <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg max-h-60 overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-2">My Adventures</h2>
-            
-            <div className="space-y-2">
-              <div className="bg-white rounded p-2 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">Mount Rainier</h3>
-                    <p className="text-xs text-gray-500">May 28 - May 30, 2025</p>
-                  </div>
-                  <div className="terrain-badge terrain-t3">T3</div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded p-2 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">Cascade Pass</h3>
-                    <p className="text-xs text-gray-500">7.4 miles • 1,800 ft elevation</p>
-                  </div>
-                  <div className="terrain-badge terrain-t2">T2</div>
-                </div>
-              </div>
-            </div>
-            
-            <h2 className="text-lg font-semibold mt-4 mb-2">Summit Cards Progress</h2>
-            <div className="bg-white rounded p-2 shadow-sm">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium">Common</span>
-                <span className="text-xs">12/20</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
-              </div>
-              
-              <div className="flex justify-between items-center mb-1 mt-2">
-                <span className="text-sm font-medium">Rare</span>
-                <span className="text-xs">3/15</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '20%' }}></div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Total count display - inspired by uploaded images */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white py-3 text-center font-semibold text-gray-700 border-t">
+          {getFilteredMarkers().length} {activeView === 'social' ? 'itineraries' : 'adventures'}
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import AccordionStep from './AccordionStep';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Users } from 'lucide-react';
+import { Calendar, Clock, Navigation, Users, X } from 'lucide-react';
 import useTripPlanner from '@/hooks/useTripPlanner';
+import { toast } from '@/hooks/use-toast';
 
 const TrailCard = ({ 
   name, 
@@ -22,7 +22,7 @@ const TrailCard = ({
   gearCompatible: boolean;
   rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 }) => (
-  <div className="trip-card p-4">
+  <div className="trip-card p-4 border rounded-lg bg-white shadow-sm mb-4">
     <div className="flex justify-between items-start">
       <div>
         <h3 className="font-semibold">{name}</h3>
@@ -54,8 +54,14 @@ const TripPlanner: React.FC = () => {
     setOpenStep,
     isStepCompleted,
     isStepEnabled,
-    completeStep
+    completeStep,
+    plannerState,
+    addTeamMember,
+    removeTeamMember
   } = useTripPlanner();
+
+  const [teamMemberName, setTeamMemberName] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   const handleStepToggle = (step: 'basics' | 'startPoint' | 'team' | 'search') => {
     if (openStep === step) {
@@ -65,7 +71,25 @@ const TripPlanner: React.FC = () => {
     }
   };
 
-  const isSearchCompleted = isStepCompleted('search');
+  const handleAddTeamMember = () => {
+    if (teamMemberName.trim()) {
+      addTeamMember(teamMemberName);
+      setTeamMemberName('');
+      toast({
+        title: "Team member added",
+        description: `${teamMemberName} has been added to your trip.`,
+      });
+    }
+  };
+
+  const handleFindTrails = () => {
+    completeStep('search');
+    setShowSearchResults(true);
+    toast({
+      title: "Trails found",
+      description: "We've found 5 trails matching your criteria.",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -138,11 +162,16 @@ const TripPlanner: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Location</label>
-              <input 
-                type="text" 
-                placeholder="Enter city, park, or coordinates" 
-                className="w-full p-2 border rounded-md"
-              />
+              <div className="flex w-full border rounded-md overflow-hidden">
+                <div className="flex items-center justify-center bg-muted px-2">
+                  <Navigation size={16} />
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="Enter city, park, or coordinates" 
+                  className="w-full p-2 focus:outline-none" 
+                />
+              </div>
             </div>
             
             <div className="bg-muted/30 p-3 rounded-md">
@@ -183,10 +212,12 @@ const TripPlanner: React.FC = () => {
               <div className="flex gap-2">
                 <input 
                   type="text"
+                  value={teamMemberName}
+                  onChange={(e) => setTeamMemberName(e.target.value)}
                   placeholder="Enter name or email" 
                   className="flex-1 p-2 border rounded-md" 
                 />
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleAddTeamMember}>
                   <Users size={16} className="mr-1" />
                   Add
                 </Button>
@@ -194,19 +225,38 @@ const TripPlanner: React.FC = () => {
             </div>
             
             <div className="bg-white border rounded-md p-3">
-              <p className="text-sm font-medium mb-2">Current Team</p>
+              <p className="text-sm font-medium mb-2">Current Team ({plannerState.team.length})</p>
               <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs">
-                      YS
+                {plannerState.team.map((member) => (
+                  <div key={member.id} className="flex justify-between items-center text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-6 h-6 ${member.isOwner ? 'bg-primary' : 'bg-gray-500'} text-white rounded-full flex items-center justify-center text-xs`}>
+                        {member.avatarInitials}
+                      </div>
+                      <span>{member.name}</span>
                     </div>
-                    <span>You (Solo)</span>
+                    <div className="flex items-center">
+                      {member.isOwner ? (
+                        <div className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-800 rounded">
+                          Owner
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => removeTeamMember(member.id)}
+                          className="text-gray-500 hover:text-red-500"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-800 rounded">
-                    Owner
+                ))}
+
+                {plannerState.team.length === 0 && (
+                  <div className="text-sm text-gray-500 text-center py-2">
+                    No team members yet. Add someone to join your adventure!
                   </div>
-                </div>
+                )}
               </div>
             </div>
             
@@ -239,6 +289,7 @@ const TripPlanner: React.FC = () => {
           <div className="space-y-4">
             <Button 
               className="w-full"
+              onClick={handleFindTrails}
             >
               Find Perfect Trails
             </Button>
@@ -250,7 +301,7 @@ const TripPlanner: React.FC = () => {
         </AccordionStep>
       </div>
       
-      {isSearchCompleted && (
+      {showSearchResults && (
         <div className="mt-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Step 2/5 – Choose your trail</h2>
@@ -308,12 +359,48 @@ const TripPlanner: React.FC = () => {
               rarity="legendary"
             />
           </div>
+          
+          {/* Recommended Gear Section - new feature */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+            <h3 className="text-md font-semibold mb-3">Recommended Gear</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white p-3 rounded border">
+                <h4 className="font-medium text-sm">Essential</h4>
+                <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                  <li className="flex items-center gap-1">
+                    <span className="text-green-500">✓</span> Hiking boots
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className="text-green-500">✓</span> Water bottle (1L)
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className="text-green-500">✓</span> First aid kit
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-white p-3 rounded border">
+                <h4 className="font-medium text-sm">Weather Protection</h4>
+                <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                  <li className="flex items-center gap-1">
+                    <span className="text-green-500">✓</span> Rain jacket
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className="text-green-500">✓</span> Hat / Sun protection
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className="text-red-500">✗</span> Crampons (T4+ only)
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       
       <div>
         <h2 className="text-lg font-semibold mb-2">My Future Trips</h2>
-        <div className="trip-card p-4">
+        <div className="trip-card p-4 border rounded-lg bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-medium">Mount Baker</h3>

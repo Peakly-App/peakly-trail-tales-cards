@@ -3,6 +3,13 @@ import { useState } from 'react';
 
 type Step = 'basics' | 'startPoint' | 'team' | 'search';
 
+export interface TeamMember {
+  id: string;
+  name: string;
+  isOwner: boolean;
+  avatarInitials: string;
+}
+
 export interface PlannerState {
   dates: {
     start: string;
@@ -10,7 +17,7 @@ export interface PlannerState {
   };
   difficulty: string;
   startPoint: string;
-  team: string[];
+  team: TeamMember[];
 }
 
 export const useTripPlanner = () => {
@@ -18,14 +25,22 @@ export const useTripPlanner = () => {
   const [openStep, setOpenStep] = useState<Step>('basics');
   const [completedSteps, setCompletedSteps] = useState<Step[]>([]);
   
+  // Initialize with the current user as owner
   const [plannerState, setPlannerState] = useState<PlannerState>({
     dates: {
       start: '',
       end: ''
     },
-    difficulty: '',
+    difficulty: 'moderate',
     startPoint: '',
-    team: []
+    team: [
+      {
+        id: 'current-user',
+        name: 'You (Solo)',
+        isOwner: true,
+        avatarInitials: 'YS'
+      }
+    ]
   });
 
   const isStepCompleted = (step: Step) => completedSteps.includes(step);
@@ -44,16 +59,55 @@ export const useTripPlanner = () => {
     }
 
     // Advance to next step
-    if (step === 'basics') setCurrentStep('startPoint');
-    else if (step === 'startPoint') setCurrentStep('team');
-    else if (step === 'team') setCurrentStep('search');
+    if (step === 'basics') {
+      setOpenStep('startPoint');
+      setCurrentStep('startPoint');
+    }
+    else if (step === 'startPoint') {
+      setOpenStep('team');
+      setCurrentStep('team');
+    }
+    else if (step === 'team') {
+      setOpenStep('search');
+      setCurrentStep('search');
+    }
   };
 
-  const updatePlannerState = (field: keyof PlannerState, value: any) => {
-    setPlannerState({
-      ...plannerState,
+  const updatePlannerState = <K extends keyof PlannerState>(field: K, value: PlannerState[K]) => {
+    setPlannerState(prev => ({
+      ...prev,
       [field]: value
-    });
+    }));
+  };
+
+  const addTeamMember = (name: string) => {
+    if (!name.trim()) return;
+    
+    // Generate initials from name
+    const initials = name
+      .split(' ')
+      .map(part => part.charAt(0).toUpperCase())
+      .join('')
+      .substring(0, 2);
+      
+    const newMember: TeamMember = {
+      id: `member-${Date.now()}`,
+      name: name,
+      isOwner: false,
+      avatarInitials: initials || 'XX'
+    };
+    
+    setPlannerState(prev => ({
+      ...prev,
+      team: [...prev.team, newMember]
+    }));
+  };
+  
+  const removeTeamMember = (id: string) => {
+    setPlannerState(prev => ({
+      ...prev,
+      team: prev.team.filter(member => member.id !== id)
+    }));
   };
 
   return {
@@ -65,7 +119,9 @@ export const useTripPlanner = () => {
     isStepCompleted,
     isStepEnabled,
     completeStep,
-    updatePlannerState
+    updatePlannerState,
+    addTeamMember,
+    removeTeamMember
   };
 };
 
