@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import SummitCard from './SummitCard';
 import { Button } from '@/components/ui/button';
@@ -85,84 +86,86 @@ const CardCollection: React.FC = () => {
   };
   
   return (
-    <ScrollArea className="h-[calc(100vh-4rem)]">
-      <div className="space-y-6 p-4">
-        <h1 className="text-2xl font-bold">Summit Collection</h1>
-        
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Collection Progress</h2>
-            <span className="text-lg font-bold">{stats.percentage}%</span>
+    <div className="h-[calc(100vh-4rem)] flex flex-col">
+      <ScrollArea className="flex-grow">
+        <div className="space-y-6 p-4">
+          <h1 className="text-2xl font-bold">Summit Collection</h1>
+          
+          <div className="bg-white rounded-lg shadow-md p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Collection Progress</h2>
+              <span className="text-lg font-bold">{stats.percentage}%</span>
+            </div>
+            
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div 
+                className="bg-peakly-success h-3 rounded-full" 
+                style={{ width: `${stats.percentage}%` }}
+              ></div>
+            </div>
+            
+            <div className="flex justify-between text-sm">
+              <span>{stats.obtained} obtained</span>
+              <span>{stats.total - stats.obtained} remaining</span>
+            </div>
           </div>
           
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-            <div 
-              className="bg-peakly-success h-3 rounded-full" 
-              style={{ width: `${stats.percentage}%` }}
-            ></div>
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant={activeFilter === 'all' ? 'default' : 'outline'}
+                onClick={() => setActiveFilter('all')}
+              >
+                All
+              </Button>
+              <Button 
+                size="sm" 
+                variant={activeFilter === 'obtained' ? 'default' : 'outline'}
+                onClick={() => setActiveFilter('obtained')}
+              >
+                Obtained
+              </Button>
+              <Button 
+                size="sm" 
+                variant={activeFilter === 'missing' ? 'default' : 'outline'}
+                onClick={() => setActiveFilter('missing')}
+              >
+                Missing
+              </Button>
+            </div>
+            
+            <select 
+              className="text-sm border rounded-md p-1"
+              value={rarityFilter}
+              onChange={(e) => setRarityFilter(e.target.value as any)}
+            >
+              <option value="all">All Rarities</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="epic">Epic</option>
+              <option value="legendary">Legendary</option>
+            </select>
           </div>
           
-          <div className="flex justify-between text-sm">
-            <span>{stats.obtained} obtained</span>
-            <span>{stats.total - stats.obtained} remaining</span>
+          <div className="grid grid-cols-2 gap-4 pb-20">
+            {filteredCards.map(card => (
+              <SummitCard
+                key={card.id}
+                name={card.name}
+                elevation={card.elevation}
+                image={card.image}
+                rarity={card.rarity}
+                obtained={card.obtained}
+                location={card.location}
+                description={card.description}
+              />
+            ))}
           </div>
         </div>
-        
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant={activeFilter === 'all' ? 'default' : 'outline'}
-              onClick={() => setActiveFilter('all')}
-            >
-              All
-            </Button>
-            <Button 
-              size="sm" 
-              variant={activeFilter === 'obtained' ? 'default' : 'outline'}
-              onClick={() => setActiveFilter('obtained')}
-            >
-              Obtained
-            </Button>
-            <Button 
-              size="sm" 
-              variant={activeFilter === 'missing' ? 'default' : 'outline'}
-              onClick={() => setActiveFilter('missing')}
-            >
-              Missing
-            </Button>
-          </div>
-          
-          <select 
-            className="text-sm border rounded-md p-1"
-            value={rarityFilter}
-            onChange={(e) => setRarityFilter(e.target.value as any)}
-          >
-            <option value="all">All Rarities</option>
-            <option value="common">Common</option>
-            <option value="uncommon">Uncommon</option>
-            <option value="rare">Rare</option>
-            <option value="epic">Epic</option>
-            <option value="legendary">Legendary</option>
-          </select>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4 pb-20">
-          {filteredCards.map(card => (
-            <SummitCard
-              key={card.id}
-              name={card.name}
-              elevation={card.elevation}
-              image={card.image}
-              rarity={card.rarity}
-              obtained={card.obtained}
-              location={card.location}
-              description={card.description}
-            />
-          ))}
-        </div>
-      </div>
-    </ScrollArea>
+      </ScrollArea>
+    </div>
   );
 };
 

@@ -171,7 +171,7 @@ const MapView: React.FC = () => {
         
         {/* Total count display - at bottom */}
         <div 
-          className="absolute bottom-8 left-0 right-0 mx-4"
+          className="absolute bottom-20 left-0 right-0 mx-4 z-10"
         >
           <button
             onClick={() => setDrawerOpen(true)}
@@ -180,7 +180,7 @@ const MapView: React.FC = () => {
             <span className="inline-flex items-center justify-center bg-primary text-white rounded-full w-6 h-6 text-sm">
               {filteredMarkers.length}
             </span>
-            <span>itinéraires • Appuyez pour voir les détails</span>
+            <span>trails • Tap to view details</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2">
               <path d="m18 15-6-6-6 6"/>
             </svg>
@@ -188,14 +188,14 @@ const MapView: React.FC = () => {
         </div>
       </div>
 
-      {/* Drawer for destinations list */}
+      {/* Drawer for destinations list - increased z-index to appear above nav */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-h-[85vh]">
+        <DrawerContent className="max-h-[85vh] z-50">
           <DrawerHeader>
             <DrawerTitle>Destinations ({filteredMarkers.length})</DrawerTitle>
           </DrawerHeader>
-          <ScrollArea className="h-[70vh] px-4">
-            <div className="grid gap-4 pb-8">
+          <ScrollArea className="h-[70vh] px-4 pb-16">
+            <div className="grid gap-4 pb-20">
               {filteredMarkers.map(marker => (
                 <Card key={marker.id} className="shadow-sm">
                   <CardHeader className="pb-2">
