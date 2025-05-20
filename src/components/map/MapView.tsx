@@ -171,10 +171,20 @@ const MapView: React.FC = () => {
         
         {/* Total count display - at bottom */}
         <div 
-          className="absolute bottom-8 left-0 right-0 bg-white/50 backdrop-blur-sm py-3 text-center font-semibold text-gray-700 shadow-md rounded-full mx-4 cursor-pointer"
-          onClick={() => setDrawerOpen(true)}
+          className="absolute bottom-8 left-0 right-0 mx-4"
         >
-          {filteredMarkers.length} itinéraires • Tap to view details
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="bg-white shadow-lg w-full py-3 px-6 rounded-full font-medium flex items-center justify-center gap-2"
+          >
+            <span className="inline-flex items-center justify-center bg-primary text-white rounded-full w-6 h-6 text-sm">
+              {filteredMarkers.length}
+            </span>
+            <span>itinéraires • Appuyez pour voir les détails</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2">
+              <path d="m18 15-6-6-6 6"/>
+            </svg>
+          </button>
         </div>
       </div>
 

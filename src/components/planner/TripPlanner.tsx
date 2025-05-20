@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AccordionStep from './AccordionStep';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,7 @@ const TrailCard = ({
         <h3 className="font-semibold">{name}</h3>
         <div className="flex gap-4 mt-1 text-sm text-gray-600">
           <span>{distance}</span>
-          <span>{elevation} gain</span>
+          <span>{elevation} dénivelé</span>
           <span>{time}</span>
         </div>
       </div>
@@ -48,20 +49,20 @@ const TrailCard = ({
         <span className={`px-2 py-1 rounded bg-rarity-${rarity} text-white`}>
           {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
         </span>
-        <span className="ml-2">Cards: {rarity === 'legendary' ? '1' : rarity === 'epic' ? '2' : rarity === 'rare' ? '3-4' : '5+'}</span>
+        <span className="ml-2">Cartes: {rarity === 'legendary' ? '1' : rarity === 'epic' ? '2' : rarity === 'rare' ? '3-4' : '5+'}</span>
       </div>
       <div className="flex gap-2">
         <span className={`flex items-center text-xs ${gearDetails.compatible ? 'text-green-600' : 'text-red-600'}`}>
           <span className={`inline-block w-2 h-2 rounded-full ${gearDetails.compatible ? 'bg-green-500' : 'bg-red-500'} mr-1`}></span>
-          Gear: {gearDetails.compatible ? 'Compatible' : 'Incompatible'}
+          Équipement: {gearDetails.compatible ? 'Compatible' : 'Incompatible'}
         </span>
-        <Button size="sm">See Details</Button>
+        <Button size="sm">Voir détails</Button>
       </div>
     </div>
     
     {!gearDetails.compatible && gearDetails.missing && gearDetails.missing.length > 0 && (
       <div className="mt-2 p-2 bg-red-50 rounded text-xs text-red-700">
-        <strong>Missing gear:</strong> {gearDetails.missing.join(', ')}
+        <strong>Équipement manquant:</strong> {gearDetails.missing.join(', ')}
       </div>
     )}
   </div>
@@ -88,10 +89,14 @@ const ProgressSteps = ({ currentStep, totalSteps }: { currentStep: number; total
       {Array.from({ length: totalSteps }).map((_, index) => (
         <div
           key={index}
-          className={`w-3 h-3 rounded-full ${
-            index < currentStep ? 'bg-primary' : index === currentStep ? 'bg-primary ring-2 ring-primary/30' : 'bg-gray-200'
+          className={`w-4 h-4 rounded-full flex items-center justify-center ${
+            index < currentStep ? 'bg-primary' : index === currentStep ? 'bg-white ring-2 ring-primary' : 'bg-gray-200'
           }`}
-        />
+        >
+          {index <= currentStep && (
+            <span className={`text-xs font-medium ${index === currentStep ? 'text-primary' : 'text-white'}`}>{index + 1}</span>
+          )}
+        </div>
       ))}
     </div>
   );
@@ -125,8 +130,8 @@ const TripPlanner: React.FC = () => {
       addTeamMember(teamMemberName);
       setTeamMemberName('');
       toast({
-        title: "Team member added",
-        description: `${teamMemberName} has been added to your trip.`,
+        title: "Membre ajouté",
+        description: `${teamMemberName} a été ajouté à votre voyage.`,
       });
     }
   };
@@ -135,23 +140,23 @@ const TripPlanner: React.FC = () => {
     completeStep('search');
     setShowSearchResults(true);
     toast({
-      title: "Trails found",
-      description: "We've found 5 trails matching your criteria.",
+      title: "Itinéraires trouvés",
+      description: "Nous avons trouvé 5 itinéraires correspondant à vos critères.",
     });
   };
 
   // Sample future trips data
   const futureTrips = [
-    { id: 1, name: "Mount Baker", date: "June 15 - June 17, 2025", terrain: "T4" },
-    { id: 2, name: "Alpine Lakes Loop", date: "July 20 - July 22, 2025", terrain: "T3" }
+    { id: 1, name: "Mont Baker", date: "15 Juin - 17 Juin, 2025", terrain: "T4" },
+    { id: 2, name: "Boucle des Lacs Alpins", date: "20 Juillet - 22 Juillet, 2025", terrain: "T3" }
   ];
 
   // Trail recommendations with gear compatibility 
   const trailRecommendations = [
     {
-      name: "Eagle Ridge Trail",
-      distance: "4.2 miles",
-      elevation: "870 ft",
+      name: "Sentier Eagle Ridge",
+      distance: "6,8 km",
+      elevation: "265 m",
       time: "2h 15m",
       terrain: "T2" as const,
       gearCompatible: true,
@@ -159,9 +164,9 @@ const TripPlanner: React.FC = () => {
       gearDetails: { compatible: true }
     },
     {
-      name: "Lake Serene",
-      distance: "8.2 miles",
-      elevation: "2,000 ft",
+      name: "Lac Serene",
+      distance: "13,2 km",
+      elevation: "609 m",
       time: "5h 30m",
       terrain: "T3" as const,
       gearCompatible: true,
@@ -170,33 +175,33 @@ const TripPlanner: React.FC = () => {
     },
     {
       name: "Cascade Pass",
-      distance: "7.4 miles",
-      elevation: "1,800 ft",
+      distance: "11,9 km",
+      elevation: "549 m",
       time: "4h 45m",
       terrain: "T3" as const,
       gearCompatible: false,
       rarity: "rare" as const,
-      gearDetails: { compatible: false, missing: ["Trekking poles", "Water filter"] }
+      gearDetails: { compatible: false, missing: ["Bâtons de randonnée", "Filtre à eau"] }
     },
     {
-      name: "Gothic Basin",
-      distance: "9.2 miles",
-      elevation: "2,840 ft",
+      name: "Bassin Gothic",
+      distance: "14,8 km",
+      elevation: "866 m",
       time: "7h",
       terrain: "T4" as const,
       gearCompatible: false,
       rarity: "epic" as const,
-      gearDetails: { compatible: false, missing: ["Ice axe", "Microspikes", "Navigation device"] }
+      gearDetails: { compatible: false, missing: ["Piolet", "Crampons légers", "Appareil de navigation"] }
     },
     {
-      name: "Mount Rainier Summit",
-      distance: "16 miles",
-      elevation: "9,000 ft",
-      time: "2 days",
+      name: "Sommet du Mont Rainier",
+      distance: "25,7 km",
+      elevation: "2743 m",
+      time: "2 jours",
       terrain: "T5" as const,
       gearCompatible: false,
       rarity: "legendary" as const,
-      gearDetails: { compatible: false, missing: ["Crampons", "Ice axe", "Mountaineering boots", "Ropes", "Harness"] }
+      gearDetails: { compatible: false, missing: ["Crampons", "Piolet", "Chaussures d'alpinisme", "Cordes", "Baudrier"] }
     }
   ];
 
@@ -206,14 +211,14 @@ const TripPlanner: React.FC = () => {
         <div className="flex justify-between items-center">
           <Button variant="ghost" size="sm" onClick={() => setShowSearchResults(false)} className="flex items-center gap-1">
             <ArrowLeft size={16} />
-            Back
+            Retour
           </Button>
-          <h1 className="text-lg font-bold">Trail Results</h1>
+          <h1 className="text-lg font-bold">Résultats d'itinéraires</h1>
         </div>
 
         <div className="text-center mb-6">
           <ProgressSteps currentStep={1} totalSteps={5} />
-          <p className="text-sm text-muted-foreground">Choose your trail</p>
+          <p className="text-sm text-muted-foreground">Choisissez votre itinéraire</p>
         </div>
           
         <div className="space-y-4">
@@ -234,34 +239,34 @@ const TripPlanner: React.FC = () => {
           
         {/* Recommended Gear Section */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
-          <h3 className="text-md font-semibold mb-3">Your Gear Inventory</h3>
+          <h3 className="text-md font-semibold mb-3">Votre inventaire d'équipement</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white p-3 rounded border">
-              <h4 className="font-medium text-sm">Essential</h4>
+              <h4 className="font-medium text-sm">Essentiel</h4>
               <ul className="text-sm text-gray-600 mt-1 space-y-1">
                 <li className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span> Hiking boots
+                  <span className="text-green-500">✓</span> Chaussures de randonnée
                 </li>
                 <li className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span> Water bottle (1L)
+                  <span className="text-green-500">✓</span> Gourde (1L)
                 </li>
                 <li className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span> First aid kit
+                  <span className="text-green-500">✓</span> Trousse de premiers soins
                 </li>
               </ul>
             </div>
               
             <div className="bg-white p-3 rounded border">
-              <h4 className="font-medium text-sm">Weather Protection</h4>
+              <h4 className="font-medium text-sm">Protection météo</h4>
               <ul className="text-sm text-gray-600 mt-1 space-y-1">
                 <li className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span> Rain jacket
+                  <span className="text-green-500">✓</span> Veste imperméable
                 </li>
                 <li className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span> Hat / Sun protection
+                  <span className="text-green-500">✓</span> Chapeau / Protection solaire
                 </li>
                 <li className="flex items-center gap-1">
-                  <span className="text-red-500">✗</span> Crampons (T4+ only)
+                  <span className="text-red-500">✗</span> Crampons (T4+ seulement)
                 </li>
               </ul>
             </div>
@@ -273,16 +278,16 @@ const TripPlanner: React.FC = () => {
 
   return (
     <ScrollArea className="h-[calc(100vh-4rem)]">
-      <div className="space-y-6 p-4">
-        <h1 className="text-2xl font-bold">Plan Your Adventure</h1>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-6">Planifiez votre aventure</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left column: Trip planning steps */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Plan A Trip</h2>
+            <h2 className="text-lg font-semibold mb-4">Planifier un voyage</h2>
             <div className="space-y-4">
               <AccordionStep
-                title="Dates & Difficulty"
+                title="Dates & Difficulté"
                 stepNumber={1}
                 isOpen={openStep === 'basics'}
                 isCompleted={isStepCompleted('basics')}
@@ -292,7 +297,7 @@ const TripPlanner: React.FC = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Start Date</label>
+                      <label className="block text-sm font-medium mb-1">Date de départ</label>
                       <div className="flex w-full border rounded-md overflow-hidden">
                         <div className="flex items-center justify-center bg-muted px-2">
                           <Calendar size={16} />
@@ -304,7 +309,7 @@ const TripPlanner: React.FC = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">End Date</label>
+                      <label className="block text-sm font-medium mb-1">Date de retour</label>
                       <div className="flex w-full border rounded-md overflow-hidden">
                         <div className="flex items-center justify-center bg-muted px-2">
                           <Calendar size={16} />
@@ -318,11 +323,11 @@ const TripPlanner: React.FC = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium mb-1">Difficulty Level</label>
+                    <label className="block text-sm font-medium mb-1">Niveau de difficulté</label>
                     <select className="w-full p-2 border rounded-md">
-                      <option value="easy">Easy (T1-T2)</option>
-                      <option value="moderate">Moderate (T3)</option>
-                      <option value="hard">Hard (T4)</option>
+                      <option value="easy">Facile (T1-T2)</option>
+                      <option value="moderate">Modéré (T3)</option>
+                      <option value="hard">Difficile (T4)</option>
                       <option value="expert">Expert (T5+)</option>
                     </select>
                   </div>
@@ -331,13 +336,13 @@ const TripPlanner: React.FC = () => {
                     onClick={() => completeStep('basics')}
                     className="w-full"
                   >
-                    Next Step
+                    Étape suivante
                   </Button>
                 </div>
               </AccordionStep>
               
               <AccordionStep
-                title="Starting Point"
+                title="Point de départ"
                 stepNumber={2}
                 isOpen={openStep === 'startPoint'}
                 isCompleted={isStepCompleted('startPoint')}
@@ -346,14 +351,14 @@ const TripPlanner: React.FC = () => {
               >
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Location</label>
+                    <label className="block text-sm font-medium mb-1">Localisation</label>
                     <div className="flex w-full border rounded-md overflow-hidden">
                       <div className="flex items-center justify-center bg-muted px-2">
                         <Navigation size={16} />
                       </div>
                       <input 
                         type="text" 
-                        placeholder="Enter city, park, or coordinates" 
+                        placeholder="Entrez une ville, parc ou coordonnées" 
                         className="w-full p-2 focus:outline-none" 
                       />
                     </div>
@@ -361,7 +366,7 @@ const TripPlanner: React.FC = () => {
                   
                   <div className="bg-muted/30 p-3 rounded-md">
                     <p className="text-sm">
-                      <strong>Tip:</strong> Choose a starting point within 150 miles for a weekend trip
+                      <strong>Conseil:</strong> Choisissez un point de départ à moins de 240 km pour un voyage de weekend
                     </p>
                   </div>
                   
@@ -371,20 +376,20 @@ const TripPlanner: React.FC = () => {
                       className="w-full"
                       onClick={() => setOpenStep('basics')}
                     >
-                      Back
+                      Retour
                     </Button>
                     <Button 
                       onClick={() => completeStep('startPoint')}
                       className="w-full"
                     >
-                      Next Step
+                      Étape suivante
                     </Button>
                   </div>
                 </div>
               </AccordionStep>
               
               <AccordionStep
-                title="Team Members"
+                title="Membres du groupe"
                 stepNumber={3}
                 isOpen={openStep === 'team'}
                 isCompleted={isStepCompleted('team')}
@@ -393,24 +398,24 @@ const TripPlanner: React.FC = () => {
               >
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Add Hikers</label>
+                    <label className="block text-sm font-medium mb-1">Ajouter des randonneurs</label>
                     <div className="flex gap-2">
                       <input 
                         type="text"
                         value={teamMemberName}
                         onChange={(e) => setTeamMemberName(e.target.value)}
-                        placeholder="Enter name or email" 
+                        placeholder="Entrez un nom ou email" 
                         className="flex-1 p-2 border rounded-md" 
                       />
                       <Button variant="outline" size="sm" onClick={handleAddTeamMember}>
                         <Users size={16} className="mr-1" />
-                        Add
+                        Ajouter
                       </Button>
                     </div>
                   </div>
                   
                   <div className="bg-white border rounded-md p-3">
-                    <p className="text-sm font-medium mb-2">Current Team ({plannerState.team.length})</p>
+                    <p className="text-sm font-medium mb-2">Équipe actuelle ({plannerState.team.length})</p>
                     <div className="space-y-2">
                       {plannerState.team.map((member) => (
                         <div key={member.id} className="flex justify-between items-center text-sm">
@@ -423,7 +428,7 @@ const TripPlanner: React.FC = () => {
                           <div className="flex items-center">
                             {member.isOwner ? (
                               <div className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-800 rounded">
-                                Owner
+                                Organisateur
                               </div>
                             ) : (
                               <button 
@@ -439,7 +444,7 @@ const TripPlanner: React.FC = () => {
 
                       {plannerState.team.length === 0 && (
                         <div className="text-sm text-gray-500 text-center py-2">
-                          No team members yet. Add someone to join your adventure!
+                          Pas encore de membres d'équipe. Ajoutez quelqu'un pour rejoindre votre aventure!
                         </div>
                       )}
                     </div>
@@ -451,20 +456,20 @@ const TripPlanner: React.FC = () => {
                       className="w-full"
                       onClick={() => setOpenStep('startPoint')}
                     >
-                      Back
+                      Retour
                     </Button>
                     <Button 
                       onClick={() => completeStep('team')}
                       className="w-full"
                     >
-                      Next Step
+                      Étape suivante
                     </Button>
                   </div>
                 </div>
               </AccordionStep>
               
               <AccordionStep
-                title="Find Trails"
+                title="Trouver des itinéraires"
                 stepNumber={4}
                 isOpen={openStep === 'search'}
                 isCompleted={isStepCompleted('search')}
@@ -476,11 +481,11 @@ const TripPlanner: React.FC = () => {
                     className="w-full"
                     onClick={handleFindTrails}
                   >
-                    Find Perfect Trails
+                    Trouver des itinéraires parfaits
                   </Button>
                   
                   <p className="text-center text-sm text-muted-foreground">
-                    AI will recommend trails based on your preferences
+                    L'IA recommandera des itinéraires en fonction de vos préférences
                   </p>
                 </div>
               </AccordionStep>
@@ -489,7 +494,7 @@ const TripPlanner: React.FC = () => {
           
           {/* Right column: Future trips */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">My Future Trips</h2>
+            <h2 className="text-lg font-semibold mb-4">Mes voyages à venir</h2>
             {futureTrips.length > 0 ? (
               <div className="space-y-2">
                 {futureTrips.map(trip => (
@@ -503,8 +508,8 @@ const TripPlanner: React.FC = () => {
               </div>
             ) : (
               <div className="text-center p-6 bg-gray-50 rounded-lg border border-dashed">
-                <p className="text-gray-500">No upcoming trips yet</p>
-                <p className="text-sm text-gray-400 mt-1">Plan your first adventure!</p>
+                <p className="text-gray-500">Pas encore de voyage à venir</p>
+                <p className="text-sm text-gray-400 mt-1">Planifiez votre première aventure!</p>
               </div>
             )}
           </div>
