@@ -84,6 +84,12 @@
   }
 }
 
+@layer utilities {
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+}
+
 @layer components {
   .map-container {
     height: calc(100vh - 4rem);
@@ -141,8 +147,7 @@
   }
   
   .card-front, .card-back {
-    @apply absolute top-0 left-0 w-full h-full backface-visibility-hidden;
-    backface-visibility: hidden;
+    @apply absolute top-0 left-0 w-full h-full backface-hidden;
   }
   
   .card-front {
