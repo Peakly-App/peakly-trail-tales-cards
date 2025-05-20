@@ -2,6 +2,23 @@
 import React, { useState } from 'react';
 import FilterBar from './FilterBar';
 import LeafletMap from './LeafletMap';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+
+interface MapMarker {
+  id: number;
+  position: [number, number];
+  type: 'friend' | 'famous' | 'completed' | 'planned' | 'saved';
+  title: string;
+  description: string;
+  difficulty: 'common' | 'rare' | 'mythic' | 'legendary';
+}
 
 const MapView: React.FC = () => {
   const [activeView, setActiveView] = useState<'social' | 'personal'>('social');
@@ -11,13 +28,14 @@ const MapView: React.FC = () => {
     mythic: false,
     legendary: false,
   });
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   // Enhanced sample data for social map markers
-  const socialMapMarkers = [
+  const socialMapMarkers: MapMarker[] = [
     {
       id: 1,
       position: [46.2276, 2.2137] as [number, number], // Sample position in France
-      type: 'friend' as const,
+      type: 'friend',
       title: 'Sarah\'s Hike',
       description: 'Beautiful trail with amazing views!',
       difficulty: 'common'
@@ -25,7 +43,7 @@ const MapView: React.FC = () => {
     {
       id: 2,
       position: [46.4276, 2.5137] as [number, number],
-      type: 'famous' as const,
+      type: 'famous',
       title: 'Famous Peak',
       description: 'A popular destination among expert hikers',
       difficulty: 'legendary'
@@ -33,7 +51,7 @@ const MapView: React.FC = () => {
     {
       id: 3,
       position: [46.1276, 1.9137] as [number, number],
-      type: 'friend' as const,
+      type: 'friend',
       title: 'John\'s Adventure',
       description: 'Weekend camping trip',
       difficulty: 'rare'
@@ -41,7 +59,7 @@ const MapView: React.FC = () => {
     {
       id: 6,
       position: [46.2976, 2.3937] as [number, number],
-      type: 'friend' as const,
+      type: 'friend',
       title: 'Forest Trail',
       description: 'Beautiful forest with many trails',
       difficulty: 'common'
@@ -49,7 +67,7 @@ const MapView: React.FC = () => {
     {
       id: 7,
       position: [46.1576, 2.1337] as [number, number],
-      type: 'famous' as const,
+      type: 'famous',
       title: 'Mountain Range',
       description: 'Challenging but rewarding summit',
       difficulty: 'mythic'
@@ -57,7 +75,7 @@ const MapView: React.FC = () => {
     {
       id: 8,
       position: [46.3176, 2.4137] as [number, number],
-      type: 'friend' as const,
+      type: 'friend',
       title: 'Scenic Viewpoint',
       description: 'Amazing panoramic views',
       difficulty: 'legendary'
@@ -65,11 +83,11 @@ const MapView: React.FC = () => {
   ];
 
   // Personal map markers
-  const personalMapMarkers = [
+  const personalMapMarkers: MapMarker[] = [
     {
       id: 4,
       position: [46.2876, 2.1137] as [number, number],
-      type: 'completed' as const,
+      type: 'completed',
       title: 'My Favorite Trail',
       description: 'Completed on April 15, 2025',
       difficulty: 'common'
@@ -77,7 +95,7 @@ const MapView: React.FC = () => {
     {
       id: 5,
       position: [46.3276, 2.3137] as [number, number],
-      type: 'planned' as const,
+      type: 'planned',
       title: 'Planned Trip',
       description: 'Scheduled for June 10, 2025',
       difficulty: 'rare'
@@ -85,7 +103,7 @@ const MapView: React.FC = () => {
     {
       id: 9,
       position: [46.2376, 2.0137] as [number, number],
-      type: 'saved' as const,
+      type: 'saved',
       title: 'Dream Summit',
       description: 'To do someday',
       difficulty: 'mythic'
@@ -93,7 +111,7 @@ const MapView: React.FC = () => {
     {
       id: 10,
       position: [46.1876, 1.7137] as [number, number],
-      type: 'completed' as const,
+      type: 'completed',
       title: 'Epic Challenge',
       description: 'Conquered last summer',
       difficulty: 'legendary'
@@ -120,6 +138,17 @@ const MapView: React.FC = () => {
     setActiveView(view);
   };
 
+  const getMarkerColorClass = (difficulty: 'common' | 'rare' | 'mythic' | 'legendary') => {
+    switch (difficulty) {
+      case 'common': return 'bg-rarity-common text-gray-800';
+      case 'rare': return 'bg-rarity-rare text-white';
+      case 'mythic': return 'bg-rarity-epic text-white';
+      case 'legendary': return 'bg-rarity-legendary text-white';
+    }
+  };
+
+  const filteredMarkers = getFilteredMarkers();
+
   return (
     <div className="relative h-screen w-full flex flex-col">
       {/* Map container takes full height */}
@@ -127,7 +156,7 @@ const MapView: React.FC = () => {
         <LeafletMap 
           center={activeView === 'social' ? [46.2276, 2.2137] : [46.2876, 2.1137]} 
           zoom={7}
-          markers={getFilteredMarkers()}
+          markers={filteredMarkers}
           mapMode={activeView}
         />
         
@@ -141,10 +170,49 @@ const MapView: React.FC = () => {
         </div>
         
         {/* Total count display - at bottom */}
-        <div className="absolute bottom-16 left-0 right-0 bg-white/50 backdrop-blur-sm py-3 text-center font-semibold text-gray-700">
-          {getFilteredMarkers().length} itinéraires
+        <div 
+          className="absolute bottom-8 left-0 right-0 bg-white/50 backdrop-blur-sm py-3 text-center font-semibold text-gray-700 shadow-md rounded-full mx-4 cursor-pointer"
+          onClick={() => setDrawerOpen(true)}
+        >
+          {filteredMarkers.length} itinéraires • Tap to view details
         </div>
       </div>
+
+      {/* Drawer for destinations list */}
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader>
+            <DrawerTitle>Destinations ({filteredMarkers.length})</DrawerTitle>
+          </DrawerHeader>
+          <ScrollArea className="h-[70vh] px-4">
+            <div className="grid gap-4 pb-8">
+              {filteredMarkers.map(marker => (
+                <Card key={marker.id} className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg">{marker.title}</CardTitle>
+                      <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getMarkerColorClass(marker.difficulty)}`}>
+                        {marker.difficulty.charAt(0).toUpperCase() + marker.difficulty.slice(1)}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">{marker.description}</p>
+                    <div className="flex items-center mt-3 text-xs text-gray-500">
+                      <span className="mr-2">
+                        {marker.type.charAt(0).toUpperCase() + marker.type.slice(1)}
+                      </span>
+                      {activeView === 'personal' && marker.type === 'planned' && (
+                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Upcoming</span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
