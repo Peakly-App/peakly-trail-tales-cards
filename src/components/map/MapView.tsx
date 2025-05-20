@@ -1,6 +1,7 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import FilterBar from './FilterBar';
+import LeafletMap from './LeafletMap';
 
 const MapView: React.FC = () => {
   const [activeView, setActiveView] = useState<'social' | 'personal'>('social');
@@ -9,16 +10,41 @@ const MapView: React.FC = () => {
     mountain: true,
     viewpoint: false,
   });
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
   
-  // For demo purposes, we'll just show a placeholder map image
-  // In a real app, this would be replaced with Leaflet integration
-  
-  useEffect(() => {
-    console.log('Map view active:', activeView);
-    console.log('Filters:', filters);
-    // Here you would initialize the Leaflet map and update based on filters
-  }, [activeView, filters]);
+  // Sample data for map markers
+  const socialMapMarkers = [
+    {
+      id: 1,
+      position: [46.2276, 2.2137] as [number, number], // Sample position in France
+      type: 'friend' as const,
+      title: 'Sarah\'s Hike',
+      description: 'Beautiful trail with amazing views!'
+    },
+    {
+      id: 2,
+      position: [46.4276, 2.5137] as [number, number],
+      type: 'famous' as const,
+      title: 'Famous Peak',
+      description: 'A popular destination among expert hikers'
+    },
+    {
+      id: 3,
+      position: [46.1276, 1.9137] as [number, number],
+      type: 'friend' as const,
+      title: 'John\'s Adventure',
+      description: 'Weekend camping trip'
+    }
+  ];
+
+  // Filter markers based on selected filters
+  const filteredMarkers = socialMapMarkers.filter(marker => {
+    // This is just a placeholder. In a real app, markers would have properties
+    // matching the filter criteria (forest, mountain, viewpoint)
+    return true;
+  });
+
+  console.log('Map view active:', activeView);
+  console.log('Filters:', filters);
 
   const renderPersonalDashboard = () => {
     return (
@@ -92,23 +118,12 @@ const MapView: React.FC = () => {
       />
       
       {activeView === 'social' ? (
-        <div className="relative rounded-xl overflow-hidden bg-gray-100 map-container" ref={mapContainerRef}>
-          {/* This would be the Leaflet map in a real app */}
-          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&q=80&w=1000')" }}></div>
-          
-          {/* Sample pins for illustration */}
-          <div className="absolute top-1/4 left-1/3 leaflet-pin friend">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          </div>
-          
-          <div className="absolute top-1/2 right-1/4 leaflet-pin famous">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg>
-          </div>
+        <div className="relative rounded-xl overflow-hidden bg-gray-100 map-container">
+          <LeafletMap 
+            center={[46.2276, 2.2137]} // Default center (France)
+            zoom={6}
+            markers={filteredMarkers}
+          />
         </div>
       ) : (
         renderPersonalDashboard()

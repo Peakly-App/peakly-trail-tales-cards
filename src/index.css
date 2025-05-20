@@ -253,6 +253,14 @@
   background-color: #FFB74D;
 }
 
+.friend-marker {
+  filter: hue-rotate(200deg);
+}
+
+.famous-marker {
+  filter: hue-rotate(30deg) saturate(1.5);
+}
+
 .gear-compatible {
   @apply text-peakly-success;
 }
