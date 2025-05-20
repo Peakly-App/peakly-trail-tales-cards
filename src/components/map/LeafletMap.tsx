@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Icon, L } from 'leaflet';
+import { Icon } from 'leaflet';
 
 interface MapMarker {
   id: number;
@@ -31,7 +31,10 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) =
   // Fix for default marker icons not showing in Leaflet using ES module imports
   useEffect(() => {
     // Fix for default marker icons
-    delete Icon.Default.prototype._getIconUrl;
+    // We need to use a different approach since _getIconUrl may not be accessible
+    Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+    
+    // Set the icon options directly without accessing _getIconUrl
     Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
