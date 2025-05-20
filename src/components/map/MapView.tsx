@@ -19,7 +19,6 @@ const MapView: React.FC = () => {
       type: 'friend' as const,
       title: 'Sarah\'s Hike',
       description: 'Beautiful trail with amazing views!',
-      price: 71
     },
     {
       id: 2,
@@ -27,7 +26,6 @@ const MapView: React.FC = () => {
       type: 'famous' as const,
       title: 'Famous Peak',
       description: 'A popular destination among expert hikers',
-      price: 100
     },
     {
       id: 3,
@@ -35,7 +33,6 @@ const MapView: React.FC = () => {
       type: 'friend' as const,
       title: 'John\'s Adventure',
       description: 'Weekend camping trip',
-      price: 59
     },
     {
       id: 6,
@@ -100,25 +97,27 @@ const MapView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Discover Peaks</h1>
-      
-      <FilterBar 
-        onFilterChange={setFilters} 
-        onToggleView={setActiveView}
-        activeView={activeView}
-      />
-      
-      <div className="relative rounded-xl overflow-hidden bg-gray-100" style={{ height: '500px' }}>
+    <div className="relative h-screen w-full flex flex-col">
+      {/* Map container takes full height */}
+      <div className="relative flex-grow w-full">
         <LeafletMap 
           center={activeView === 'social' ? [46.2276, 2.2137] : [46.2876, 2.1137]} 
           zoom={7}
           markers={getFilteredMarkers()}
         />
         
-        {/* Total count display - inspired by uploaded images */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white py-3 text-center font-semibold text-gray-700 border-t">
-          {getFilteredMarkers().length} {activeView === 'social' ? 'itineraries' : 'adventures'}
+        {/* Overlay elements positioned absolutely over the map */}
+        <div className="absolute top-0 left-0 right-0 p-4 z-10">
+          <FilterBar 
+            onFilterChange={setFilters} 
+            onToggleView={setActiveView}
+            activeView={activeView}
+          />
+        </div>
+        
+        {/* Total count display - at bottom */}
+        <div className="absolute bottom-16 left-0 right-0 bg-white/50 backdrop-blur-sm py-3 text-center font-semibold text-gray-700">
+          {getFilteredMarkers().length} itinéraires
         </div>
       </div>
     </div>

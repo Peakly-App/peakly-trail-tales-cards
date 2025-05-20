@@ -1,5 +1,7 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface MapMarker {
   id: number;
@@ -18,77 +20,103 @@ interface LeafletMapProps {
 }
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ center, zoom, markers = [] }) => {
-  // Generate static map URL with markers
-  const generateMapUrl = () => {
-    // Base URL for OpenStreetMap static map (via staticmap.org - a free service)
-    let baseUrl = `https://staticmap.org/static?center=${center[0]},${center[1]}&zoom=${zoom}&size=600x400&type=osm`;
-    
-    // Add markers
-    markers.forEach((marker, index) => {
-      let markerType = 'blue';
-      if (marker.type === 'famous') markerType = 'orange';
-      if (marker.type === 'forest') markerType = 'green';
-      if (marker.type === 'mountain') markerType = 'purple';
-      if (marker.type === 'viewpoint') markerType = 'red';
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    // Initialize map if it doesn't exist
+    if (!mapRef.current) {
+      mapRef.current = L.map(mapContainerRef.current, {
+        center: center,
+        zoom: zoom,
+        zoomControl: false, // We'll add it in a better position
+      });
       
-      baseUrl += `&markers=${marker.position[0]},${marker.position[1]},${markerType},${index + 1}`;
+      // Add zoom control to bottom right
+      L.control.zoom({
+        position: 'bottomright'
+      }).addTo(mapRef.current);
+
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }).addTo(mapRef.current);
+    } else {
+      // Update center and zoom if map already exists
+      mapRef.current.setView(center, zoom);
+    }
+
+    // Create marker icons
+    const createMarkerIcon = (type: MapMarker['type'], count?: number) => {
+      let bgColor = '#000';
+      let iconUrl = '';
+
+      switch (type) {
+        case 'forest':
+          bgColor = '#2D6A4F';
+          iconUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS10cmVlIj48cGF0aCBkPSJtMTIgMi41MjdjMS4xOCAwIDIuNDMuOTc0IDIuNDMgMi40MjcgMCAxLjY4NS0uOTUzIDMuMzI4LTEuNDMgNC45NzgtLjQ3NyAxLjY0OC45MDYgMi42MyAxLjQzIDIuNjMgMS4wMTMgMCAxLjU3LS41NDIgMi00LS42ODQgMi4yOTItMS44OTcgNC40MTYtMS44OTcgNC40MTZoLTUuMDY2cy0xLjIxMy0yLjEyNC0xLjg5Ny00LjQxNmMuNDMgMy40NTggMS45IDQgMS45IDQgLjUyMyAwIDEuOTA2LS45ODIgMS40My0yLjYzLS40NzctMS42NS0xLjQzLTMuMjkzLTEuNDMtNC45NzggMC0xLjQ1MyAxLjI1LTIuNDI3IDIuNDMtMi40MjdaIi8+PHBhdGggZD0iTTEyIDIydi00Ii8+PC9zdmc+';
+          break;
+        case 'mountain':
+          bgColor = '#8E9196';
+          iconUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1tb3VudGFpbiI+PHBhdGggZD0ibTguOTQgMTItMi44My0yLjgzYTEuNSAxLjUgMCAwIDEgMC0yLjEybC4wMS0uMDFhMS41IDEuNSAwIDAgMSAyLjEyLjAxbDIuNyAyLjcgMi41OS0yLjU4YTEuNSAxLjUgMCAwIDEgMi4xMiAwbDMuMTIgMy4xMiAxLjggMS44YTEgMSAwIDAgMSAwIDEuNDFsLTQuNCA0LjRhMS41IDEuNSAwIDAgMS0yLjEyIDBMMTIuMDUgMTVsLTMuMTEgMy4xMWExLjUgMS41IDAgMCAxLTIuMTMtMi4xMkw4Ljk0IDEyWiIvPjxjaXJjbGUgY3g9IjE4IiBjeT0iNiIgcj0iMiIvPjwvc3ZnPg==';
+          break;
+        case 'viewpoint':
+          bgColor = '#FF7F50';
+          iconUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1leWUiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjQiLz48cGF0aCBkPSJNMiAxMnMzLTcgMTAtNyAxMCA3IDEwIDctMyA3LTEwIDctMTAtNy0xMC03WiIvPjwvc3ZnPg==';
+          break;
+        case 'friend':
+        case 'famous':
+        default:
+          bgColor = count ? '#000' : '#4285F4';
+          break;
+      }
+
+      return L.divIcon({
+        className: `custom-marker ${type}`,
+        html: count 
+          ? `<div style="background-color: ${bgColor}; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">${count}</div>`
+          : `<div style="background-color: ${bgColor}; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+             <img src="${iconUrl}" alt="${type}" style="width: 18px; height: 18px; filter: brightness(0) invert(1);">
+             </div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+    };
+
+    // Clear existing markers
+    mapRef.current.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        mapRef.current?.removeLayer(layer);
+      }
     });
-    
-    return baseUrl;
-  };
+
+    // Add new markers
+    markers.forEach(marker => {
+      const icon = createMarkerIcon(marker.type, marker.type === 'friend' || marker.type === 'famous' ? Number(marker.id) % 100 : undefined);
+      
+      const mapMarker = L.marker(marker.position, { icon })
+        .addTo(mapRef.current!)
+        .bindPopup(`
+          <div class="p-2">
+            <h3 class="font-bold">${marker.title}</h3>
+            <p>${marker.description}</p>
+            ${marker.difficulty ? `<p class="mt-1 text-sm"><strong>Difficulté:</strong> ${marker.difficulty}</p>` : ''}
+          </div>
+        `);
+    });
+
+    // Clean up on unmount
+    return () => {
+      // We don't remove the map on unmount, as it will be reused
+    };
+  }, [center, markers, zoom]);
 
   return (
-    <div className="relative h-full w-full flex flex-col">
-      <div className="relative flex-grow overflow-hidden rounded-lg">
-        <img 
-          src={generateMapUrl()} 
-          alt="Map" 
-          className="w-full h-full object-cover rounded-lg"
-        />
-        
-        {/* Price bubbles overlay - inspired by Airbnb-style map from uploaded images */}
-        <div className="absolute inset-0 pointer-events-none">
-          {markers.filter(marker => marker.price).map(marker => (
-            <div 
-              key={marker.id} 
-              className="absolute bg-white rounded-full px-2 py-1 shadow-lg font-medium text-sm"
-              style={{ 
-                left: `${20 + Math.random() * 60}%`, 
-                top: `${20 + Math.random() * 60}%`,
-                transform: 'translate(-50%, -50%)'
-              }}
-            >
-              {marker.price}€
-            </div>
-          ))}
-        </div>
-        
-        {/* Trail info card - inspired by Komoot-style UI */}
-        {markers.length > 0 && (
-          <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-3">
-              <h3 className="font-semibold text-sm">{markers[0].title}</h3>
-              <p className="text-xs text-gray-600">{markers[0].description}</p>
-              
-              {markers[0].difficulty && (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800`}>
-                    {markers[0].difficulty}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {markers[0].position[0].toFixed(2)}, {markers[0].position[1].toFixed(2)}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Map metadata - inspired by the counter at bottom of Komoot UI */}
-      <div className="text-center text-sm font-medium mt-2">
-        {markers.length} {markers.length === 1 ? 'location' : 'locations'}
-      </div>
+    <div className="h-full w-full">
+      <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} className="z-0" />
     </div>
   );
 };
