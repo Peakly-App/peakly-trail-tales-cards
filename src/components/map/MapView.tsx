@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import FilterBar from './FilterBar';
 import LeafletMap from './LeafletMap';
@@ -56,11 +55,7 @@ const MapView: React.FC = () => {
 
   // Filter markers based on selected filters
   const filteredMarkers = activeView === 'social' 
-    ? socialMapMarkers.filter(marker => {
-        // This is just a placeholder. In a real app, markers would have properties
-        // matching the filter criteria (forest, mountain, viewpoint)
-        return true;
-      })
+    ? socialMapMarkers
     : personalMapMarkers;
 
   return (
@@ -73,7 +68,7 @@ const MapView: React.FC = () => {
         activeView={activeView}
       />
       
-      <div className="relative rounded-xl overflow-hidden bg-gray-100 map-container">
+      <div className="relative rounded-xl overflow-hidden bg-gray-100" style={{ height: '500px' }}>
         <LeafletMap 
           center={activeView === 'social' ? [46.2276, 2.2137] : [46.2876, 2.1137]} 
           zoom={6}
